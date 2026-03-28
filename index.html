@@ -396,23 +396,28 @@ function ptsBreakdown(tip, res) {
 (function init() {
   if (FIREBASE_CONFIG.apiKey === "DIN_API_KEY") {
     document.getElementById('view-login').style.display='flex';
-    toast('Konfigurationsnycklar saknas.','error'); return;
+    showErr('Firebase-konfiguration saknas. Kontakta Niklas.'); return;
   }
-  firebase.initializeApp(FIREBASE_CONFIG);
-  db   = firebase.firestore();
-  auth = firebase.auth();
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('view-login').style.display='none';
-      startListener();
-      setTimeout(() => showView('home'), 800);
-    } else {
-      currentUser = null;
-      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-      document.getElementById('view-login').style.display='flex';
-    }
-  });
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db   = firebase.firestore();
+    auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('view-login').style.display='none';
+        startListener();
+        setTimeout(() => showView('home'), 800);
+      } else {
+        currentUser = null;
+        document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+        document.getElementById('view-login').style.display='flex';
+      }
+    });
+  } catch(e) {
+    document.getElementById('view-login').style.display='flex';
+    showErr('Kunde inte ansluta till Firebase: ' + e.message);
+  }
 })();
 
 // Hämtar visningsnamn: displayName, annars del före @ i e-post, med stor bokstav
@@ -429,6 +434,7 @@ function userInitials() {
 
 // ── Auth ───────────────────────────────────────────────────────
 async function doLogin() {
+  if (!auth) { showErr('Sidan laddar fortfarande – vänta ett ögonblick och försök igen.'); return; }
   const email=document.getElementById('l-email').value.trim();
   const pass=document.getElementById('l-pass').value;
   const btn=document.getElementById('login-btn');
@@ -439,6 +445,7 @@ async function doLogin() {
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(e) {
     const msg=e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'Fel e-post eller lösenord.':
+      e.code==='auth/invalid-credential'?'Fel e-post eller lösenord.':
       e.code==='auth/too-many-requests'?'För många försök. Vänta en stund.':'Inloggningsfel: '+e.message;
     showErr(msg);
   }
