@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ByråTipset</title>
 
-<!-- ═══════════════════════════════════════════════════════════════
-  STEG 1: Klistra in din Firebase-konfiguration här nedan.
-  Hämta den från Firebase Console → Projektinställningar → Dina appar
-  ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════
+  Klistra in din Firebase-konfiguration här
+  ═══════════════════════════════════════════ -->
 <script>
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAhYr2H6AgioBWZAYhg3SkL-mF1oiopMD4",
@@ -19,13 +18,12 @@ const FIREBASE_CONFIG = {
   appId:             "1:1069845834522:web:0c5ef2fc5e1471a0ef1aa3"
 };
 </script>
-<!-- ═══════════════════════════════════════════════════════════════ -->
 
 <style>
 :root{
   --green:#166534;--green-h:#14532d;--green-bg:#dcfce7;--green-t:#14532d;
-  --amb-bg:#fef3c7;--amb-t:#92400e;--blue-bg:#dbeafe;--blue-t:#1e40af;
-  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;
+  --amb-bg:#fef3c7;--amb-t:#92400e;
+  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;
   --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g800:#1f2937;--g900:#111827;
   --r:12px;--rs:8px;
 }
@@ -35,7 +33,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .view{display:none;}.view.active{display:block;}
 .card{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:12px;}
 label{font-size:13px;color:var(--g600);display:block;margin-bottom:4px;}
-input[type=text],input[type=datetime-local],select{
+input[type=text],input[type=email],input[type=password],input[type=datetime-local],select{
   width:100%;padding:8px 11px;border:1px solid var(--g200);border-radius:var(--rs);
   font-size:14px;font-family:inherit;color:var(--g900);background:#fff;outline:none;transition:border-color .15s;
 }
@@ -49,7 +47,6 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
 .bg{background:var(--green-bg);color:var(--green-t);}
 .ba{background:var(--amb-bg);color:var(--amb-t);}
-.bb{background:var(--blue-bg);color:var(--blue-t);}
 .bgr{background:var(--g100);color:var(--g600);}
 .tab-bar{display:flex;border-bottom:1px solid var(--g200);margin-bottom:1.25rem;overflow-x:auto;}
 .tab{padding:8px 13px;font-size:14px;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
@@ -73,22 +70,48 @@ button:disabled{opacity:.4;cursor:not-allowed;}
   box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:1000;white-space:nowrap;}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.cfg-banner{background:#fef3c7;border:1px solid #fde68a;border-radius:var(--rs);padding:1rem;margin-bottom:1rem;font-size:13px;color:#92400e;line-height:1.6;}
-.cfg-banner strong{display:block;margin-bottom:4px;font-size:14px;}
+
+/* Inloggning */
+#view-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
+.login-box{width:100%;max-width:360px;background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:2rem;}
+.login-logo{font-size:28px;font-weight:900;letter-spacing:-.5px;color:var(--green);margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--g500);margin-bottom:1.5rem;}
+.err{background:#fee2e2;border:1px solid #fecaca;border-radius:var(--rs);padding:9px 12px;font-size:13px;color:#991b1b;margin-bottom:12px;display:none;}
+
+/* Söklänkar */
+.search-links{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
+.search-link{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--g200);border-radius:var(--rs);text-decoration:none;color:var(--g800);font-size:14px;transition:background .1s;}
+.search-link:hover{background:var(--g50);}
+.search-link .icon{font-size:16px;flex-shrink:0;}
+.search-link .lnk-label{flex:1;font-weight:500;}
+.search-link .lnk-sub{font-size:12px;color:var(--g400);}
+.search-note{font-size:12px;color:var(--g500);background:var(--g50);border-radius:var(--rs);padding:10px 12px;line-height:1.6;}
 </style>
 </head>
 <body>
 <div id="app">
 <div id="toast"></div>
 
-<!-- Konfigurationsbanner (visas om Firebase inte är konfigurerat) -->
-<div class="cfg-banner" id="cfg-banner" style="display:none">
-  <strong>⚙️ Firebase inte konfigurerat</strong>
-  Öppna filen i en textredigerare och ersätt värdena i <code>FIREBASE_CONFIG</code> längst upp med dina riktiga Firebase-uppgifter. Se README.md för instruktioner.
+<!-- ── INLOGGNING ── -->
+<div id="view-login" style="display:none;">
+  <div class="login-box">
+    <div class="login-logo">ByråTipset ⚽</div>
+    <div class="login-sub">Företagsbyrån · Logga in för att delta</div>
+    <div class="err" id="login-err"></div>
+    <div style="margin-bottom:12px;">
+      <label>E-postadress</label>
+      <input type="email" id="l-email" placeholder="namn@foretagsbyran.ax" autocomplete="email"/>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label>Lösenord</label>
+      <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="primary" id="login-btn" onclick="doLogin()" style="width:100%">Logga in</button>
+    <div style="margin-top:14px;font-size:12px;color:var(--g400);text-align:center;line-height:1.6;">
+      Kontot skapas av administratören i Firebase Console.<br>Glömt lösenord? Kontakta Niklas.
+    </div>
+  </div>
 </div>
-
-<!-- Laddning -->
-<p id="loading-msg" style="text-align:center;padding:3rem 0;color:var(--g400);font-size:14px">Ansluter till ByråTipset…</p>
 
 <!-- ── HOME ── -->
 <div class="view" id="view-home">
@@ -96,17 +119,18 @@ button:disabled{opacity:.4;cursor:not-allowed;}
     <div>
       <p class="lbl" style="margin-bottom:1px">Företagsbyrån · 2026</p>
       <h1 style="font-size:24px;font-weight:800;letter-spacing:-.5px">ByråTipset ⚽</h1>
-      <p id="live-status" style="font-size:12px;color:var(--g400);margin-top:2px"></p>
+      <p id="live-status" style="font-size:12px;color:var(--g400);margin-top:2px;"></p>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;padding-top:4px;">
       <button onclick="nav('leaderboard')">Topplista</button>
       <button class="primary" onclick="nav('new-match')">+ Match</button>
+      <button onclick="doLogout()" style="font-size:12px;padding:6px 10px;color:var(--g500);" title="Logga ut">↩</button>
     </div>
   </div>
   <div id="home-lb"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <p class="lbl">Säsong 2026</p>
-    <button id="season-btn" onclick="fetchSeason()" style="font-size:12px;padding:5px 10px;">Hämta schema med AI ✦</button>
+    <p id="user-label" style="font-size:12px;color:var(--g400);"></p>
   </div>
   <div id="home-list"></div>
 </div>
@@ -115,16 +139,16 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 <div class="view" id="view-new-match">
   <div class="back"><button onclick="nav('home')">← Tillbaka</button><h2 style="font-size:18px;font-weight:700">Lägg till match</h2></div>
   <div class="card">
-    <div style="margin-bottom:10px"><label>Hemmalag</label>
+    <div style="margin-bottom:10px;"><label>Hemmalag</label>
       <select id="nm-home"><option>IFK Mariehamn</option><option>Åland United</option></select>
     </div>
-    <div style="margin-bottom:10px"><label>Bortalag</label>
+    <div style="margin-bottom:10px;"><label>Bortalag</label>
       <input id="nm-opp" type="text" placeholder="t.ex. HJK Helsingfors"/>
     </div>
-    <div style="margin-bottom:10px"><label>Tävling</label>
+    <div style="margin-bottom:10px;"><label>Tävling</label>
       <input id="nm-comp" type="text" placeholder="t.ex. Veikkausliiga, Naisten Liiga"/>
     </div>
-    <div style="margin-bottom:14px"><label>Datum och tid</label>
+    <div style="margin-bottom:14px;"><label>Datum och tid</label>
       <input id="nm-date" type="datetime-local"/>
     </div>
     <button class="primary" id="create-btn" onclick="createMatch()" style="width:100%">Skapa match</button>
@@ -134,17 +158,17 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 <!-- ── MATCHDETALJ ── -->
 <div class="view" id="view-match">
   <div class="back"><button onclick="nav('home')">← Tillbaka</button></div>
-  <div class="card" style="text-align:center;margin-bottom:1rem;padding:1rem">
-    <p class="lbl" style="margin-bottom:4px" id="m-comp">–</p>
-    <div style="display:flex;justify-content:center;align-items:center;gap:1.5rem;margin-bottom:4px">
-      <div><p style="font-size:17px;font-weight:800" id="m-home">–</p><p style="font-size:10px;color:var(--g400)">Hemma</p></div>
-      <p style="font-size:13px;color:var(--g400)">vs</p>
-      <div><p style="font-size:17px;font-weight:800" id="m-opp">–</p><p style="font-size:10px;color:var(--g400)">Borta</p></div>
+  <div class="card" style="text-align:center;margin-bottom:1rem;padding:1rem;">
+    <p class="lbl" style="margin-bottom:4px;" id="m-comp">–</p>
+    <div style="display:flex;justify-content:center;align-items:center;gap:1.5rem;margin-bottom:4px;">
+      <div><p style="font-size:17px;font-weight:800;" id="m-home">–</p><p style="font-size:10px;color:var(--g400);">Hemma</p></div>
+      <p style="font-size:13px;color:var(--g400);">vs</p>
+      <div><p style="font-size:17px;font-weight:800;" id="m-opp">–</p><p style="font-size:10px;color:var(--g400);">Borta</p></div>
     </div>
-    <p style="font-size:13px;color:var(--g500)" id="m-meta">–</p>
+    <p style="font-size:13px;color:var(--g500);" id="m-meta">–</p>
   </div>
   <div class="tab-bar">
-    <div class="tab active" id="tbtn-info" onclick="switchTab('info')">Info</div>
+    <div class="tab active" id="tbtn-info" onclick="switchTab('info')">Info & odds</div>
     <div class="tab" id="tbtn-tips" onclick="switchTab('tips')">Tips (<span id="tip-count">0</span>)</div>
     <div class="tab" id="tbtn-result" onclick="switchTab('result')">Resultat</div>
     <div class="tab" id="tbtn-lb" onclick="switchTab('lb')">Topplista</div>
@@ -152,20 +176,28 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 
   <!-- TAB INFO -->
   <div id="tc-info">
-    <button class="primary" id="fetch-btn" onclick="fetchInfo()" style="width:100%;margin-bottom:1rem">Hämta matchinfo med AI ✦</button>
-    <div id="info-display"></div>
+    <div id="search-links-box" class="search-links"></div>
+    <div class="search-note">Klicka på länkarna för att öppna sökningen i en ny flik. Klistra in anteckningar nedan som underlag för tipskaffe.</div>
+    <div style="margin-top:12px;">
+      <label style="margin-bottom:6px;">Anteckningar inför matchen</label>
+      <textarea id="info-notes" rows="5"
+        style="width:100%;padding:9px 11px;border:1px solid var(--g200);border-radius:var(--rs);font-size:14px;font-family:inherit;color:var(--g900);resize:vertical;outline:none;"
+        placeholder="T.ex. IFK i bra form (3 raka vinster). HJK utan Pukki. PAF: hemmavinst 1.75…"
+        oninput="scheduleNoteSave()"></textarea>
+      <button onclick="saveNotes()" style="margin-top:8px;font-size:13px;padding:6px 12px;" id="save-note-btn">Spara anteckningar</button>
+    </div>
   </div>
 
   <!-- TAB TIPS -->
-  <div id="tc-tips" style="display:none">
+  <div id="tc-tips" style="display:none;">
     <div class="card">
-      <p style="font-size:13px;font-weight:700;margin-bottom:10px">Registrera ditt tips</p>
-      <div style="margin-bottom:10px"><label>Ditt namn</label>
+      <p style="font-size:13px;font-weight:700;margin-bottom:10px;">Registrera ditt tips</p>
+      <div style="margin-bottom:10px;"><label>Ditt namn</label>
         <input id="t-name" type="text" placeholder="Förnamn"/>
       </div>
-      <div class="grid2" style="margin-bottom:12px">
+      <div class="grid2" style="margin-bottom:12px;">
         <div>
-          <label style="text-align:center;display:block;margin-bottom:6px">Halvtid</label>
+          <label style="text-align:center;display:block;margin-bottom:6px;">Halvtid</label>
           <div class="score-row">
             <input id="t-ht-h" type="text" class="si" placeholder="0" maxlength="2"/>
             <span class="sep">–</span>
@@ -173,7 +205,7 @@ button:disabled{opacity:.4;cursor:not-allowed;}
           </div>
         </div>
         <div>
-          <label style="text-align:center;display:block;margin-bottom:6px">Slutresultat</label>
+          <label style="text-align:center;display:block;margin-bottom:6px;">Slutresultat</label>
           <div class="score-row">
             <input id="t-ft-h" type="text" class="si" placeholder="0" maxlength="2"/>
             <span class="sep">–</span>
@@ -181,26 +213,23 @@ button:disabled{opacity:.4;cursor:not-allowed;}
           </div>
         </div>
       </div>
-      <button class="primary" id="tip-btn" onclick="submitTip()" style="width:100%">Skicka in tips</button>
+      <button class="primary" id="tip-btn" onclick="submitTip()" style="width:100%;">Skicka in tips</button>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <p style="font-size:13px;color:var(--g500)" id="tips-label">0 tips</p>
-      <div style="display:flex;gap:6px;">
-        <button id="reveal-btn" onclick="toggleReveal()" style="font-size:12px;padding:5px 10px;">Avslöja tips</button>
-      </div>
+      <p style="font-size:13px;color:var(--g500);" id="tips-label">0 tips</p>
+      <button id="reveal-btn" onclick="toggleReveal()" style="font-size:12px;padding:5px 10px;">Avslöja tips</button>
     </div>
     <div id="tips-area"></div>
   </div>
 
   <!-- TAB RESULTAT -->
-  <div id="tc-result" style="display:none">
-    <div class="card" style="margin-bottom:10px">
-      <p style="font-size:13px;font-weight:700;margin-bottom:10px">Matchresultat</p>
-      <button class="primary" id="fetch-result-btn" onclick="fetchResult()" style="width:100%;margin-bottom:12px">Hämta resultat med AI ✦</button>
-      <p style="font-size:12px;color:var(--g500);text-align:center;margin-bottom:10px">— eller ange manuellt —</p>
-      <div class="grid2" style="margin-bottom:12px">
+  <div id="tc-result" style="display:none;">
+    <div class="card" style="margin-bottom:10px;">
+      <p style="font-size:13px;font-weight:700;margin-bottom:12px;">Ange matchresultat</p>
+      <div id="result-search-link" style="margin-bottom:14px;"></div>
+      <div class="grid2" style="margin-bottom:12px;">
         <div>
-          <label style="text-align:center;display:block;margin-bottom:6px">Halvtid</label>
+          <label style="text-align:center;display:block;margin-bottom:6px;">Halvtid</label>
           <div class="score-row">
             <input id="r-ht-h" type="text" class="si" placeholder="0" maxlength="2"/>
             <span class="sep">–</span>
@@ -208,7 +237,7 @@ button:disabled{opacity:.4;cursor:not-allowed;}
           </div>
         </div>
         <div>
-          <label style="text-align:center;display:block;margin-bottom:6px">Slutresultat</label>
+          <label style="text-align:center;display:block;margin-bottom:6px;">Slutresultat</label>
           <div class="score-row">
             <input id="r-ft-h" type="text" class="si" placeholder="0" maxlength="2"/>
             <span class="sep">–</span>
@@ -216,98 +245,118 @@ button:disabled{opacity:.4;cursor:not-allowed;}
           </div>
         </div>
       </div>
-      <button class="primary" onclick="saveResult()" style="width:100%">Spara & beräkna poäng</button>
+      <button class="primary" onclick="saveResult()" style="width:100%;">Spara & beräkna poäng</button>
     </div>
     <div id="result-display"></div>
   </div>
 
-  <!-- TAB TOPPLISTA (matchkontext) -->
-  <div id="tc-lb" style="display:none">
+  <!-- TAB TOPPLISTA -->
+  <div id="tc-lb" style="display:none;">
     <div id="match-lb-display"></div>
   </div>
 </div>
 
 <!-- ── TOPPLISTA ── -->
 <div class="view" id="view-leaderboard">
-  <div class="back"><button onclick="nav('home')">← Tillbaka</button><h2 style="font-size:18px;font-weight:700">Topplista 2026</h2></div>
+  <div class="back"><button onclick="nav('home')">← Tillbaka</button><h2 style="font-size:18px;font-weight:700;">Topplista 2026</h2></div>
   <div id="lb-content"></div>
-  <div id="lb-info" style="margin-top:1rem"></div>
+  <div id="lb-info" style="margin-top:1rem;"></div>
+</div>
 </div>
 
-</div>
-
-<!-- Firebase SDK (compat v9) -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-// ── Globalt tillstånd ──────────────────────────────────────────
-let db = null;
-let matches = [];          // Live-cache från Firestore
-let mid = null;            // Aktiv match-id
-let revealed = false;
-let unsubscribe = null;    // Firestore listener
+let db = null, auth = null;
+let matches = [], mid = null, revealed = false;
+let currentUser = null;
+let noteSaveTimer = null;
 
-// ── Firebase-init ──────────────────────────────────────────────
-function initFirebase() {
+// ── Init ───────────────────────────────────────────
+(function init() {
   const isDemo = FIREBASE_CONFIG.apiKey === "DIN_API_KEY";
   if (isDemo) {
-    document.getElementById('cfg-banner').style.display = 'block';
-    document.getElementById('loading-msg').style.display = 'none';
-    renderHome();
-    showView('home');
-    return false;
+    document.getElementById('view-login').style.display = 'flex';
+    toast('Konfigurationsnycklar saknas. Se README.', 'error');
+    return;
   }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  auth = firebase.auth();
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      document.getElementById('view-login').style.display = 'none';
+      document.getElementById('user-label').textContent = user.email;
+      startListener();
+      setTimeout(() => showView('home'), 800);
+    } else {
+      currentUser = null;
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-login').style.display = 'flex';
+    }
+  });
+})();
+
+// ── Auth ───────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  const errEl = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+  errEl.style.display = 'none';
+  if (!email || !pass) { showErr('Fyll i e-post och lösenord.'); return; }
+  btn.disabled = true; btn.textContent = 'Loggar in…';
   try {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.firestore();
-    return true;
+    await auth.signInWithEmailAndPassword(email, pass);
   } catch(e) {
-    toast('Firebase-fel: ' + e.message, 'error');
-    return false;
+    const msg = e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password'
+      ? 'Fel e-post eller lösenord.' : e.code === 'auth/too-many-requests'
+      ? 'För många försök. Vänta en stund.' : 'Inloggningsfel: ' + e.message;
+    showErr(msg);
   }
+  btn.disabled = false; btn.textContent = 'Logga in';
+}
+function showErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg; el.style.display = 'block';
+}
+document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+
+async function doLogout() {
+  await auth.signOut();
 }
 
-// ── Real-time listener ─────────────────────────────────────────
+// ── Firestore listener ─────────────────────────────
 function startListener() {
-  if (!db) return;
   document.getElementById('live-status').innerHTML =
     '<span class="live-dot"></span>Ansluter…';
-
-  unsubscribe = db.collection('matches')
-    .orderBy('date', 'asc')
-    .onSnapshot(snapshot => {
-      matches = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      document.getElementById('live-status').innerHTML =
-        '<span class="live-dot"></span>Live · uppdateras automatiskt';
-      renderHome();
-      // Om vi är i en matchvy: uppdatera den också
-      if (mid) {
-        const m = matches.find(x => x.id === mid);
-        if (m) {
-          updateMatchHeader(m);
-          renderTips(m);
-          renderResult(m);
-          renderMatchLB();
-        }
-      }
-    }, err => {
-      document.getElementById('live-status').textContent = '⚠ Anslutningsfel';
-      toast('Firestore-fel: ' + err.message, 'error');
-    });
+  db.collection('matches').orderBy('date','asc').onSnapshot(snap => {
+    matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    document.getElementById('live-status').innerHTML =
+      '<span class="live-dot"></span>Live · uppdateras automatiskt';
+    renderHome();
+    if (mid) {
+      const m = matches.find(x => x.id === mid);
+      if (m) { updateMatchHeader(m); renderTips(m); renderResult(m); renderMatchLB(); }
+    }
+  }, err => {
+    document.getElementById('live-status').textContent = '⚠ Anslutningsfel';
+  });
 }
 
-// ── Hjälpfunktioner ────────────────────────────────────────────
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+// ── Hjälpfunktioner ────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function toast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.background = type==='success'?'#dcfce7':type==='error'?'#fee2e2':'#f3f4f6';
   t.style.color = type==='success'?'#14532d':type==='error'?'#991b1b':'#374151';
   t.style.display = 'block';
-  clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3500);
+  clearTimeout(t._t); t._t = setTimeout(() => t.style.display='none', 3500);
 }
 function fmtDate(s) {
   try { return new Date(s).toLocaleDateString('sv-SE',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
@@ -317,147 +366,204 @@ function isOver(m) { return new Date(m.date) < new Date(); }
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  document.getElementById('loading-msg').style.display = 'none';
 }
 function calcPts(tip, res) {
   if (!res) return 0;
-  const ht = tip.ht === res.ht, ft = tip.ft === res.ft;
-  if (ht && ft) return 4; if (ft) return 2; if (ht) return 1; return 0;
+  const ht=tip.ht===res.ht, ft=tip.ft===res.ft;
+  if (ht&&ft) return 4; if (ft) return 2; if (ht) return 1; return 0;
+}
+function q(s) { return encodeURIComponent(s); }
+
+// ── Söklänkar ──────────────────────────────────────
+function buildSearchLinks(m) {
+  const home = m.homeTeam, away = m.opp;
+  const date = new Date(m.date).toLocaleDateString('sv-SE',{day:'numeric',month:'long',year:'numeric'});
+  const comp = m.competition || 'fotboll';
+  return [
+    {
+      icon: '🔍',
+      label: 'Matchanalys & form',
+      sub: 'Google – form, statistik, nyheter',
+      url: `https://www.google.com/search?q=${q(home+' vs '+away+' '+comp+' '+new Date(m.date).getFullYear())}`
+    },
+    {
+      icon: '🎰',
+      label: 'PAF-odds',
+      sub: 'Söker odds på paf.com',
+      url: `https://www.google.com/search?q=${q('PAF odds '+home+' '+away+' site:paf.com OR paf.com/'+comp)}`
+    },
+    {
+      icon: '📊',
+      label: 'Odds & vinstchans',
+      sub: 'Google – jämför odds och prognos',
+      url: `https://www.google.com/search?q=${q('odds '+home+' vs '+away+' '+comp)}`
+    },
+    {
+      icon: '⚽',
+      label: 'Inbördes möten',
+      sub: 'Google – historik mellan lagen',
+      url: `https://www.google.com/search?q=${q(home+' '+away+' h2h inbördes möten')}`
+    }
+  ];
 }
 
-// ── Navigation ─────────────────────────────────────────────────
+function buildResultSearchLink(m) {
+  const comp = m.competition || 'fotboll';
+  const year = new Date(m.date).getFullYear();
+  return `https://www.google.com/search?q=${q(m.homeTeam+' '+m.opp+' resultat '+comp+' '+year)}`;
+}
+
+function renderSearchLinks(m) {
+  const links = buildSearchLinks(m);
+  document.getElementById('search-links-box').innerHTML = links.map(l =>
+    `<a class="search-link" href="${l.url}" target="_blank" rel="noopener">
+      <span class="icon">${l.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="lnk-label">${l.label}</div>
+        <div class="lnk-sub">${l.sub}</div>
+      </div>
+      <span style="color:var(--g400);font-size:12px;">↗</span>
+    </a>`
+  ).join('');
+  document.getElementById('result-search-link').innerHTML =
+    `<a class="search-link" href="${buildResultSearchLink(m)}" target="_blank" rel="noopener">
+      <span class="icon">🔍</span>
+      <div style="flex:1;min-width:0;">
+        <div class="lnk-label">Sök resultat på Google</div>
+        <div class="lnk-sub">Hitta halvtid och slutresultat</div>
+      </div>
+      <span style="color:var(--g400);font-size:12px;">↗</span>
+    </a>`;
+}
+
+// ── Anteckningar ───────────────────────────────────
+function scheduleNoteSave() {
+  clearTimeout(noteSaveTimer);
+  noteSaveTimer = setTimeout(saveNotes, 3000);
+}
+async function saveNotes() {
+  if (!mid || !db) return;
+  const notes = document.getElementById('info-notes').value;
+  await db.collection('matches').doc(mid).update({ info: notes });
+  document.getElementById('save-note-btn').textContent = 'Sparad ✓';
+  setTimeout(() => document.getElementById('save-note-btn').textContent='Spara anteckningar', 2000);
+}
+
+// ── Navigation ─────────────────────────────────────
 function nav(view) {
-  if (view === 'home') { renderHome(); showView('home'); }
-  else if (view === 'leaderboard') { renderLB(); showView('leaderboard'); }
-  else if (view === 'new-match') {
-    const d = new Date(); d.setDate(d.getDate()+1); d.setHours(18,0,0,0);
-    document.getElementById('nm-date').value = d.toISOString().slice(0,16);
-    document.getElementById('nm-opp').value = '';
-    document.getElementById('nm-comp').value = '';
+  if (view==='home') { renderHome(); showView('home'); }
+  else if (view==='leaderboard') { renderLB(); showView('leaderboard'); }
+  else if (view==='new-match') {
+    const d=new Date(); d.setDate(d.getDate()+1); d.setHours(18,0,0,0);
+    document.getElementById('nm-date').value=d.toISOString().slice(0,16);
+    document.getElementById('nm-opp').value='';
+    document.getElementById('nm-comp').value='';
     showView('new-match');
   }
 }
 
-// ── Bygg leaderboard-data ──────────────────────────────────────
+// ── LB-data ────────────────────────────────────────
 function buildLBData() {
-  const tots = {}, stat = {};
+  const tots={}, stat={};
   matches.forEach(m => {
     if (!m.result) return;
     (m.tips||[]).forEach(t => {
-      const p = calcPts(t, m.result);
-      tots[t.name] = (tots[t.name]||0) + p;
-      if (!stat[t.name]) stat[t.name] = { played:0, wins:0, scored:0 };
+      const p=calcPts(t,m.result);
+      tots[t.name]=(tots[t.name]||0)+p;
+      if (!stat[t.name]) stat[t.name]={played:0,wins:0,scored:0};
       stat[t.name].played++;
       if (p===4) stat[t.name].wins++;
       if (p>0) stat[t.name].scored++;
     });
   });
-  return Object.entries(tots)
-    .sort((a,b) => b[1]-a[1])
-    .map(([name,pts]) => ({ name, pts, ...(stat[name]||{}) }));
+  return Object.entries(tots).sort((a,b)=>b[1]-a[1]).map(([name,pts])=>({name,pts,...(stat[name]||{})}));
 }
 
-// ── Startsida ──────────────────────────────────────────────────
+// ── Startsida ──────────────────────────────────────
 function renderHome() {
   renderHomeLB();
-  const el = document.getElementById('home-list');
+  const el=document.getElementById('home-list');
   if (!matches.length) {
-    el.innerHTML = `<div class="card" style="text-align:center;padding:2rem;color:var(--g500);font-size:14px">
-      Inga matcher ännu.<br><br>
-      Klicka <strong>Hämta schema med AI</strong> för att hämta hela 2026-schemat automatiskt,
-      eller <strong>+ Match</strong> för att lägga till manuellt.
-    </div>`;
-    return;
+    el.innerHTML=`<div class="card" style="text-align:center;padding:2rem;color:var(--g500);font-size:14px;">
+      Inga matcher ännu.<br><br>Klicka <strong>+ Match</strong> för att lägga till.
+    </div>`; return;
   }
-  const now = new Date();
-  const upcoming = matches.filter(m => new Date(m.date) >= now && !m.result);
-  const past = [...matches].filter(m => new Date(m.date) < now || m.result).reverse();
-  let h = '';
-  if (upcoming.length) {
-    h += `<p class="lbl" style="margin-bottom:8px">Kommande</p>`;
-    upcoming.forEach(m => h += matchCard(m));
-  }
-  if (past.length) {
-    h += `<p class="lbl" style="margin:${upcoming.length?'1rem':0} 0 8px">Spelade</p>`;
-    past.forEach(m => h += matchCard(m));
-  }
-  el.innerHTML = h;
+  const now=new Date();
+  const upcoming=matches.filter(m=>new Date(m.date)>=now&&!m.result);
+  const past=[...matches].filter(m=>new Date(m.date)<now||m.result).reverse();
+  let h='';
+  if (upcoming.length) { h+=`<p class="lbl" style="margin-bottom:8px;">Kommande</p>`; upcoming.forEach(m=>h+=matchCard(m)); }
+  if (past.length) { h+=`<p class="lbl" style="margin:${upcoming.length?'1rem':0} 0 8px;">Spelade</p>`; past.forEach(m=>h+=matchCard(m)); }
+  el.innerHTML=h;
 }
 
 function renderHomeLB() {
-  const el = document.getElementById('home-lb');
-  const rows = buildLBData();
+  const el=document.getElementById('home-lb');
+  const rows=buildLBData();
   if (!rows.length) { el.innerHTML=''; return; }
-  const medal = ['🥇','🥈','🥉'];
-  let h = `<div class="mini-lb"><p class="lbl" style="margin-bottom:8px">Löpande topplista</p>`;
-  rows.slice(0,5).forEach(({name,pts},i) => {
-    h += `<div class="lb-row">
-      <span style="font-size:14px;width:22px">${medal[i]||''}</span>
-      <span style="flex:1;font-size:14px;font-weight:${i===0?700:400}">${esc(name)}</span>
-      <span style="font-size:15px;font-weight:${i===0?800:600};color:${i===0?'#15803d':'var(--g900)'}">${pts}p</span>
+  const medal=['🥇','🥈','🥉'];
+  let h=`<div class="mini-lb"><p class="lbl" style="margin-bottom:8px;">Löpande topplista</p>`;
+  rows.slice(0,5).forEach(({name,pts},i)=>{
+    h+=`<div class="lb-row">
+      <span style="font-size:14px;width:22px;">${medal[i]||''}</span>
+      <span style="flex:1;font-size:14px;font-weight:${i===0?700:400};">${esc(name)}</span>
+      <span style="font-size:15px;font-weight:${i===0?800:600};color:${i===0?'#15803d':'var(--g900)'};">${pts}p</span>
     </div>`;
   });
-  h += `</div>`;
-  el.innerHTML = h;
+  h+=`</div>`;
+  el.innerHTML=h;
 }
 
 function matchCard(m) {
-  const done = m.result !== null;
-  const over = isOver(m);
-  let badge, sub='';
-  if (done) {
-    badge = `<span class="badge bg">✓ ${m.result.ft}</span>`;
-    sub = `<p style="font-size:12px;color:var(--g500);margin-top:2px">HT ${m.result.ht} · FT ${m.result.ft}</p>`;
-  } else if (over) {
-    badge = `<span class="badge ba">Väntar på resultat</span>`;
-  } else {
-    badge = `<span class="badge bgr">${(m.tips||[]).length} tips</span>`;
-  }
-  const comp = m.competition ? `<span style="font-size:11px;color:var(--g400);margin-right:6px">${esc(m.competition)}</span>` : '';
-  return `<div class="card" style="cursor:pointer" onclick="openMatch('${m.id}')">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-      <div style="min-width:0">
-        ${comp}
-        <p style="font-size:15px;font-weight:700;margin-bottom:2px">${esc(m.homeTeam)} – ${esc(m.opp)}</p>
-        <p style="font-size:13px;color:var(--g500)">${fmtDate(m.date)}</p>${sub}
+  const done=m.result!==null, over=isOver(m);
+  let badge,sub='';
+  if (done) { badge=`<span class="badge bg">✓ ${m.result.ft}</span>`; sub=`<p style="font-size:12px;color:var(--g500);margin-top:2px;">HT ${m.result.ht} · FT ${m.result.ft}</p>`; }
+  else if (over) { badge=`<span class="badge ba">Väntar på resultat</span>`; }
+  else { badge=`<span class="badge bgr">${(m.tips||[]).length} tips</span>`; }
+  const comp=m.competition?`<span style="font-size:11px;color:var(--g400);margin-right:6px;">${esc(m.competition)}</span>`:'';
+  return `<div class="card" style="cursor:pointer;" onclick="openMatch('${m.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+      <div style="min-width:0;">${comp}
+        <p style="font-size:15px;font-weight:700;margin-bottom:2px;">${esc(m.homeTeam)} – ${esc(m.opp)}</p>
+        <p style="font-size:13px;color:var(--g500);">${fmtDate(m.date)}</p>${sub}
       </div>
-      <div style="flex-shrink:0;padding-top:2px">${badge}</div>
+      <div style="flex-shrink:0;padding-top:2px;">${badge}</div>
     </div>
   </div>`;
 }
 
-// ── Skapa match ────────────────────────────────────────────────
+// ── Skapa match ────────────────────────────────────
 async function createMatch() {
-  if (!db) { toast('Firebase ej konfigurerat.','error'); return; }
-  const home = document.getElementById('nm-home').value;
-  const opp  = document.getElementById('nm-opp').value.trim();
-  const comp = document.getElementById('nm-comp').value.trim();
-  const date = document.getElementById('nm-date').value;
-  if (!opp || !date) { toast('Fyll i bortalag och datum.','error'); return; }
-  const btn = document.getElementById('create-btn');
-  btn.disabled = true; btn.textContent = 'Skapar…';
+  if (!db || !currentUser) return;
+  const home=document.getElementById('nm-home').value;
+  const opp=document.getElementById('nm-opp').value.trim();
+  const comp=document.getElementById('nm-comp').value.trim();
+  const date=document.getElementById('nm-date').value;
+  if (!opp||!date) { toast('Fyll i bortalag och datum.','error'); return; }
+  const btn=document.getElementById('create-btn');
+  btn.disabled=true; btn.textContent='Skapar…';
   try {
-    const ref = await db.collection('matches').add({
-      homeTeam: home, opp, competition: comp, date,
-      tips: [], result: null, info: null,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    const ref=await db.collection('matches').add({
+      homeTeam:home, opp, competition:comp, date,
+      tips:[], result:null, info:'',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:currentUser.email
     });
     openMatch(ref.id);
   } catch(e) { toast('Fel: '+e.message,'error'); }
   btn.disabled=false; btn.textContent='Skapa match';
 }
 
-// ── Öppna match ────────────────────────────────────────────────
+// ── Öppna match ────────────────────────────────────
 function openMatch(id) {
-  mid = id; revealed = false;
-  const m = matches.find(x => x.id === id);
+  mid=id; revealed=false;
+  const m=matches.find(x=>x.id===id);
   if (!m) { toast('Match hittades inte.','error'); return; }
   updateMatchHeader(m);
-  renderTips(m);
-  renderResult(m);
-  renderMatchLB();
-  switchTab('info');
-  // Fyll i eventuellt befintligt resultat
+  renderSearchLinks(m);
+  document.getElementById('info-notes').value=m.info||'';
+  document.getElementById('save-note-btn').textContent='Spara anteckningar';
+  renderTips(m); renderResult(m); renderMatchLB();
   if (m.result) {
     const[hh,ha]=m.result.ht.split('-');
     const[fh,fa]=m.result.ft.split('-');
@@ -465,380 +571,189 @@ function openMatch(id) {
   } else {
     ['r-ht-h','r-ht-a','r-ft-h','r-ft-a'].forEach(id=>document.getElementById(id).value='');
   }
-  const frb = document.getElementById('fetch-result-btn');
-  frb.style.display = (isOver(m) && !m.result) ? '' : (m.result ? 'none' : 'none');
+  switchTab('info');
   showView('match');
 }
 
 function updateMatchHeader(m) {
-  document.getElementById('m-home').textContent = m.homeTeam;
-  document.getElementById('m-opp').textContent  = m.opp;
-  document.getElementById('m-comp').textContent = m.competition || 'Hemmamatch';
-  document.getElementById('m-meta').textContent = fmtDate(m.date) +
-    (m.result ? ` · HT ${m.result.ht} · FT ${m.result.ft}` : '');
-  const fb = document.getElementById('fetch-btn');
-  fb.disabled = false;
-  fb.textContent = m.info ? 'Uppdatera matchinfo med AI ✦' : 'Hämta matchinfo med AI ✦';
-  document.getElementById('info-display').innerHTML = m.info
-    ? `<div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--g800)">${esc(m.info)}</div>` : '';
+  document.getElementById('m-home').textContent=m.homeTeam;
+  document.getElementById('m-opp').textContent=m.opp;
+  document.getElementById('m-comp').textContent=m.competition||'Hemmamatch';
+  document.getElementById('m-meta').textContent=fmtDate(m.date)+(m.result?` · HT ${m.result.ht} · FT ${m.result.ft}`:'');
 }
 
 function switchTab(t) {
-  ['info','tips','result','lb'].forEach(x => {
-    document.getElementById('tbtn-'+x).className = 'tab'+(x===t?' active':'');
-    document.getElementById('tc-'+x).style.display = x===t?'':'none';
+  ['info','tips','result','lb'].forEach(x=>{
+    document.getElementById('tbtn-'+x).className='tab'+(x===t?' active':'');
+    document.getElementById('tc-'+x).style.display=x===t?'':'none';
   });
 }
 
-// ── Tips ───────────────────────────────────────────────────────
+// ── Tips ───────────────────────────────────────────
 function renderTips(m) {
-  document.getElementById('tip-count').textContent = (m.tips||[]).length;
-  document.getElementById('tips-label').textContent =
-    (m.tips||[]).length + ((m.tips||[]).length===1?' tips inlämnat':' tips inlämnade');
-  const show = revealed || m.result !== null;
-  const area = document.getElementById('tips-area');
+  document.getElementById('tip-count').textContent=(m.tips||[]).length;
+  document.getElementById('tips-label').textContent=(m.tips||[]).length+((m.tips||[]).length===1?' tips inlämnat':' tips inlämnade');
+  const show=revealed||m.result!==null;
+  const area=document.getElementById('tips-area');
   if (!(m.tips||[]).length) {
-    area.innerHTML = `<div class="card" style="text-align:center;color:var(--g500);padding:1.5rem;font-size:14px">Inga tips ännu. Registrera era tips ovan!</div>`;
-    return;
+    area.innerHTML=`<div class="card" style="text-align:center;color:var(--g500);padding:1.5rem;font-size:14px;">Inga tips ännu.</div>`; return;
   }
   if (!show) {
-    area.innerHTML = `<div class="card" style="text-align:center;color:var(--g500);padding:1.5rem;font-size:14px">
-      ${m.tips.length} tips inlämnade.<br><br>Klicka <strong>Avslöja tips</strong> när hela gänget är samlat.
-    </div>`;
-    return;
+    area.innerHTML=`<div class="card" style="text-align:center;color:var(--g500);padding:1.5rem;font-size:14px;">
+      ${m.tips.length} tips inlämnade.<br><br>Klicka <strong>Avslöja tips</strong> när alla är samlade.
+    </div>`; return;
   }
-  const hasRes = m.result !== null;
-  const scored = (m.tips||[]).map(t => ({...t, pts: hasRes ? calcPts(t, m.result) : null}));
-  if (hasRes) scored.sort((a,b) => b.pts-a.pts);
-  const htV={}, ftV={};
-  (m.tips||[]).forEach(t => { htV[t.ht]=(htV[t.ht]||0)+1; ftV[t.ft]=(ftV[t.ft]||0)+1; });
-  const cHT = Object.entries(htV).sort((a,b)=>b[1]-a[1])[0];
-  const cFT = Object.entries(ftV).sort((a,b)=>b[1]-a[1])[0];
-  let h = '';
-  scored.forEach((t,i) => {
-    const htOk = hasRes && t.ht===m.result.ht, ftOk = hasRes && t.ft===m.result.ft;
-    const pb = !hasRes?'':t.pts===4?'#dcfce7':t.pts>0?'#fef3c7':'#f3f4f6';
-    const pc = !hasRes?'':t.pts===4?'#14532d':t.pts>0?'#92400e':'#6b7280';
-    h += `<div class="row">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--g400);min-width:18px;text-align:right">${i+1}</span>
-        <span style="font-size:15px;font-weight:600">${esc(t.name)}</span>
+  const hasRes=m.result!==null;
+  const scored=(m.tips||[]).map(t=>({...t,pts:hasRes?calcPts(t,m.result):null}));
+  if (hasRes) scored.sort((a,b)=>b.pts-a.pts);
+  const htV={},ftV={};
+  (m.tips||[]).forEach(t=>{htV[t.ht]=(htV[t.ht]||0)+1;ftV[t.ft]=(ftV[t.ft]||0)+1;});
+  const cHT=Object.entries(htV).sort((a,b)=>b[1]-a[1])[0];
+  const cFT=Object.entries(ftV).sort((a,b)=>b[1]-a[1])[0];
+  let h='';
+  scored.forEach((t,i)=>{
+    const htOk=hasRes&&t.ht===m.result.ht, ftOk=hasRes&&t.ft===m.result.ft;
+    const pb=!hasRes?'':t.pts===4?'#dcfce7':t.pts>0?'#fef3c7':'#f3f4f6';
+    const pc=!hasRes?'':t.pts===4?'#14532d':t.pts>0?'#92400e':'#6b7280';
+    h+=`<div class="row">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;color:var(--g400);min-width:18px;text-align:right;">${i+1}</span>
+        <span style="font-size:15px;font-weight:600;">${esc(t.name)}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="text-align:center">
-          <div style="font-size:10px;color:var(--g400)">HT</div>
-          <div style="font-size:17px;font-weight:800;color:${htOk?'#15803d':'var(--g900)'}">${t.ht}</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:10px;color:var(--g400)">FT</div>
-          <div style="font-size:17px;font-weight:800;color:${ftOk?'#15803d':'var(--g900)'}">${t.ft}</div>
-        </div>
-        ${hasRes?`<div style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:${pb};color:${pc};font-size:13px;font-weight:800">${t.pts}p</div>`:''}
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="text-align:center;"><div style="font-size:10px;color:var(--g400);">HT</div><div style="font-size:17px;font-weight:800;color:${htOk?'#15803d':'var(--g900)'};">${t.ht}</div></div>
+        <div style="text-align:center;"><div style="font-size:10px;color:var(--g400);">FT</div><div style="font-size:17px;font-weight:800;color:${ftOk?'#15803d':'var(--g900)'};">${t.ft}</div></div>
+        ${hasRes?`<div style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:${pb};color:${pc};font-size:13px;font-weight:800;">${t.pts}p</div>`:''}
       </div>
     </div>`;
   });
-  if (cHT && cFT) {
-    h += `<div class="consensus">
-      <p class="lbl" style="margin-bottom:8px">Grupptips – vanligaste tipset</p>
-      <div style="display:flex;gap:3rem">
-        <div><p style="font-size:11px;color:var(--g400)">Halvtid</p>
-          <p style="font-size:24px;font-weight:900">${cHT[0]} <span style="font-size:12px;font-weight:400;color:var(--g400)">${cHT[1]} röst${cHT[1]>1?'er':''}</span></p>
-        </div>
-        <div><p style="font-size:11px;color:var(--g400)">Slutresultat</p>
-          <p style="font-size:24px;font-weight:900">${cFT[0]} <span style="font-size:12px;font-weight:400;color:var(--g400)">${cFT[1]} röst${cFT[1]>1?'er':''}</span></p>
-        </div>
+  if (cHT&&cFT) {
+    h+=`<div class="consensus">
+      <p class="lbl" style="margin-bottom:8px;">Grupptips – vanligaste tipset</p>
+      <div style="display:flex;gap:3rem;">
+        <div><p style="font-size:11px;color:var(--g400);">Halvtid</p><p style="font-size:24px;font-weight:900;">${cHT[0]} <span style="font-size:12px;font-weight:400;color:var(--g400);">${cHT[1]} röst${cHT[1]>1?'er':''}</span></p></div>
+        <div><p style="font-size:11px;color:var(--g400);">Slutresultat</p><p style="font-size:24px;font-weight:900;">${cFT[0]} <span style="font-size:12px;font-weight:400;color:var(--g400);">${cFT[1]} röst${cFT[1]>1?'er':''}</span></p></div>
       </div>
     </div>`;
   }
-  if (hasRes) h += `<p style="font-size:12px;color:var(--g400);text-align:center;margin-top:10px">Rätt halvtid=1p · Rätt slutresultat=2p · Båda rätt=4p</p>`;
-  area.innerHTML = h;
+  if (hasRes) h+=`<p style="font-size:12px;color:var(--g400);text-align:center;margin-top:10px;">Rätt halvtid=1p · Rätt slutresultat=2p · Båda rätt=4p</p>`;
+  area.innerHTML=h;
 }
 
 function toggleReveal() {
-  revealed = !revealed;
-  document.getElementById('reveal-btn').textContent = revealed ? 'Dölj tips' : 'Avslöja tips';
-  const m = matches.find(x => x.id === mid);
-  if (m) renderTips(m);
+  revealed=!revealed;
+  document.getElementById('reveal-btn').textContent=revealed?'Dölj tips':'Avslöja tips';
+  const m=matches.find(x=>x.id===mid); if(m) renderTips(m);
 }
 
 async function submitTip() {
-  if (!db) { toast('Firebase ej konfigurerat.','error'); return; }
-  const name = document.getElementById('t-name').value.trim();
-  const htH  = document.getElementById('t-ht-h').value.trim();
-  const htA  = document.getElementById('t-ht-a').value.trim();
-  const ftH  = document.getElementById('t-ft-h').value.trim();
-  const ftA  = document.getElementById('t-ft-a').value.trim();
+  if (!db||!currentUser) { toast('Du måste vara inloggad.','error'); return; }
+  const name=document.getElementById('t-name').value.trim();
+  const htH=document.getElementById('t-ht-h').value.trim(), htA=document.getElementById('t-ht-a').value.trim();
+  const ftH=document.getElementById('t-ft-h').value.trim(), ftA=document.getElementById('t-ft-a').value.trim();
   if (!name||htH===''||htA===''||ftH===''||ftA==='') { toast('Fyll i alla fält.','error'); return; }
-  if ([htH,htA,ftH,ftA].some(v=>isNaN(v)||v==='')) { toast('Ange siffror.','error'); return; }
-  const btn = document.getElementById('tip-btn');
+  const btn=document.getElementById('tip-btn');
   btn.disabled=true; btn.textContent='Sparar…';
   try {
-    const ref = db.collection('matches').doc(mid);
-    const snap = await ref.get();
-    const data = snap.data();
-    let tips = [...(data.tips||[])];
-    const ei = tips.findIndex(t => t.name.toLowerCase()===name.toLowerCase());
-    if (ei!==-1) {
-      if (!confirm(`${name} har redan ett tips. Ersätta?`)) { btn.disabled=false; btn.textContent='Skicka in tips'; return; }
-      tips.splice(ei,1);
-    }
-    tips.push({ name, ht:`${htH}-${htA}`, ft:`${ftH}-${ftA}`, at: new Date().toISOString() });
-    await ref.update({ tips });
+    const ref=db.collection('matches').doc(mid);
+    const snap=await ref.get();
+    let tips=[...(snap.data().tips||[])];
+    const ei=tips.findIndex(t=>t.name.toLowerCase()===name.toLowerCase());
+    if (ei!==-1) { if (!confirm(`${name} har redan ett tips. Ersätta?`)) { btn.disabled=false; btn.textContent='Skicka in tips'; return; } tips.splice(ei,1); }
+    tips.push({name,ht:`${htH}-${htA}`,ft:`${ftH}-${ftA}`,at:new Date().toISOString(),by:currentUser.email});
+    await ref.update({tips});
     ['t-name','t-ht-h','t-ht-a','t-ft-h','t-ft-a'].forEach(id=>document.getElementById(id).value='');
-    toast(`Tips från ${name} inlämnat! ✓`, 'success');
+    toast(`Tips från ${name} inlämnat! ✓`,'success');
   } catch(e) { toast('Fel: '+e.message,'error'); }
   btn.disabled=false; btn.textContent='Skicka in tips';
 }
 
-// ── Resultat ───────────────────────────────────────────────────
-async function saveResult(htOverride, ftOverride) {
-  if (!db) { toast('Firebase ej konfigurerat.','error'); return; }
-  const hh = htOverride ? htOverride.split('-')[0] : document.getElementById('r-ht-h').value.trim();
-  const ha = htOverride ? htOverride.split('-')[1] : document.getElementById('r-ht-a').value.trim();
-  const fh = ftOverride ? ftOverride.split('-')[0] : document.getElementById('r-ft-h').value.trim();
-  const fa = ftOverride ? ftOverride.split('-')[1] : document.getElementById('r-ft-a').value.trim();
+// ── Resultat ───────────────────────────────────────
+async function saveResult() {
+  if (!db||!currentUser) return;
+  const hh=document.getElementById('r-ht-h').value.trim(), ha=document.getElementById('r-ht-a').value.trim();
+  const fh=document.getElementById('r-ft-h').value.trim(), fa=document.getElementById('r-ft-a').value.trim();
   if (!hh||!ha||!fh||!fa) { toast('Fyll i hela resultatet.','error'); return; }
   try {
-    await db.collection('matches').doc(mid).update({
-      result: { ht:`${hh}-${ha}`, ft:`${fh}-${fa}` }
-    });
-    revealed = true;
-    document.getElementById('fetch-result-btn').style.display = 'none';
+    await db.collection('matches').doc(mid).update({result:{ht:`${hh}-${ha}`,ft:`${fh}-${fa}`}});
+    revealed=true;
     switchTab('result');
     toast('Resultat sparat! Poäng beräknade. ✓','success');
   } catch(e) { toast('Fel: '+e.message,'error'); }
 }
 
 function renderResult(m) {
-  const el = document.getElementById('result-display');
+  const el=document.getElementById('result-display');
   if (!m.result) { el.innerHTML=''; return; }
-  const scored = (m.tips||[]).map(t=>({...t,pts:calcPts(t,m.result)})).sort((a,b)=>b.pts-a.pts);
-  let h = `<div class="card" style="text-align:center;margin-bottom:12px">
-    <p class="lbl" style="margin-bottom:8px">Faktiskt resultat</p>
-    <div style="display:flex;justify-content:center;gap:3rem">
-      <div><p style="font-size:11px;color:var(--g400);margin-bottom:2px">Halvtid</p><p class="bscore">${m.result.ht}</p></div>
-      <div><p style="font-size:11px;color:var(--g400);margin-bottom:2px">Slutresultat</p><p class="bscore">${m.result.ft}</p></div>
+  const scored=(m.tips||[]).map(t=>({...t,pts:calcPts(t,m.result)})).sort((a,b)=>b.pts-a.pts);
+  let h=`<div class="card" style="text-align:center;margin-bottom:12px;">
+    <p class="lbl" style="margin-bottom:8px;">Faktiskt resultat</p>
+    <div style="display:flex;justify-content:center;gap:3rem;">
+      <div><p style="font-size:11px;color:var(--g400);margin-bottom:2px;">Halvtid</p><p class="bscore">${m.result.ht}</p></div>
+      <div><p style="font-size:11px;color:var(--g400);margin-bottom:2px;">Slutresultat</p><p class="bscore">${m.result.ft}</p></div>
     </div>
   </div>`;
   if (scored.length) {
-    h += `<p style="font-size:13px;font-weight:700;margin-bottom:8px">Matchpoäng</p>`;
-    scored.forEach((t,i) => {
+    h+=`<p style="font-size:13px;font-weight:700;margin-bottom:8px;">Matchpoäng</p>`;
+    scored.forEach((t,i)=>{
       const bg=t.pts===4?'#dcfce7':t.pts>0?'#fef3c7':'#f3f4f6';
       const col=t.pts===4?'#14532d':t.pts>0?'#92400e':'#6b7280';
-      h += `<div class="row">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;color:var(--g400);width:18px;text-align:right">${i+1}.</span>
-          <div>
-            <p style="font-size:15px;font-weight:700">${esc(t.name)}</p>
-            <p style="font-size:12px;color:var(--g500)">HT: ${t.ht} · FT: ${t.ft}</p>
-          </div>
+      h+=`<div class="row">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:var(--g400);width:18px;text-align:right;">${i+1}.</span>
+          <div><p style="font-size:15px;font-weight:700;">${esc(t.name)}</p><p style="font-size:12px;color:var(--g500);">HT: ${t.ht} · FT: ${t.ft}</p></div>
         </div>
-        <div style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:${bg};color:${col};font-size:15px;font-weight:800">${t.pts}p</div>
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:${bg};color:${col};font-size:15px;font-weight:800;">${t.pts}p</div>
       </div>`;
     });
   }
-  el.innerHTML = h;
-}
-
-// ── Match-topplista ────────────────────────────────────────────
-function renderMatchLB() {
-  const el = document.getElementById('match-lb-display');
-  const lb = buildLBData();
-  const matchCount = matches.filter(m=>m.result).length;
-  if (!lb.length) {
-    el.innerHTML=`<div class="card" style="text-align:center;color:var(--g500);padding:1.5rem;font-size:14px">
-      Inga avgjorda matcher ännu. Topplistan uppdateras när resultat registreras.
-    </div>`;
-    return;
-  }
-  const medal=['🥇','🥈','🥉'];
-  let h=`<p style="font-size:13px;color:var(--g500);margin-bottom:10px">${matchCount} ${matchCount===1?'match avgjord':'matcher avgjorda'} totalt</p>`;
-  lb.forEach(({name,pts,played,wins},i) => {
-    const pct=played?Math.round(wins/played*100):0;
-    h+=`<div class="row">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:16px;width:24px">${medal[i]||''}</span>
-        <div>
-          <p style="font-size:15px;font-weight:${i===0?800:600}">${esc(name)}</p>
-          <p style="font-size:12px;color:var(--g400)">${played} matcher · ${wins} perfekta (${pct}%)</p>
-        </div>
-      </div>
-      <p style="font-size:22px;font-weight:900;color:${i===0?'#15803d':'var(--g900)'}">${pts}p</p>
-    </div>`;
-  });
-  h+=`<p style="font-size:12px;color:var(--g400);text-align:center;margin-top:12px">Rätt halvtid=1p · Rätt slutresultat=2p · Båda rätt=4p</p>`;
   el.innerHTML=h;
 }
 
-// ── Säsongens topplista ────────────────────────────────────────
+function renderMatchLB() {
+  const el=document.getElementById('match-lb-display');
+  const lb=buildLBData();
+  const matchCount=matches.filter(m=>m.result).length;
+  if (!lb.length) { el.innerHTML=`<div class="card" style="text-align:center;color:var(--g500);padding:1.5rem;font-size:14px;">Inga avgjorda matcher ännu.</div>`; return; }
+  const medal=['🥇','🥈','🥉'];
+  let h=`<p style="font-size:13px;color:var(--g500);margin-bottom:10px;">${matchCount} ${matchCount===1?'match avgjord':'matcher avgjorda'} totalt</p>`;
+  lb.forEach(({name,pts,played,wins},i)=>{
+    const pct=played?Math.round(wins/played*100):0;
+    h+=`<div class="row">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;width:24px;">${medal[i]||''}</span>
+        <div><p style="font-size:15px;font-weight:${i===0?800:600};">${esc(name)}</p><p style="font-size:12px;color:var(--g400);">${played} matcher · ${wins} perfekta (${pct}%)</p></div>
+      </div>
+      <p style="font-size:22px;font-weight:900;color:${i===0?'#15803d':'var(--g900)'};">${pts}p</p>
+    </div>`;
+  });
+  h+=`<p style="font-size:12px;color:var(--g400);text-align:center;margin-top:12px;">Rätt halvtid=1p · Rätt slutresultat=2p · Båda rätt=4p</p>`;
+  el.innerHTML=h;
+}
+
 function renderLB() {
   const lb=buildLBData();
-  const el=document.getElementById('lb-content');
-  const info=document.getElementById('lb-info');
+  const el=document.getElementById('lb-content'), info=document.getElementById('lb-info');
   const matchCount=matches.filter(m=>m.result).length;
-  if (!lb.length) {
-    el.innerHTML=`<div class="card" style="text-align:center;padding:2rem;color:var(--g500);font-size:14px">Inga avgjorda matcher ännu.</div>`;
-    info.innerHTML=''; return;
-  }
+  if (!lb.length) { el.innerHTML=`<div class="card" style="text-align:center;padding:2rem;color:var(--g500);font-size:14px;">Inga avgjorda matcher ännu.</div>`; info.innerHTML=''; return; }
   const medal=['🥇','🥈','🥉'];
-  let h=`<p style="font-size:13px;color:var(--g500);margin-bottom:1rem">${matchCount} ${matchCount===1?'match avgjord':'matcher avgjorda'} hittills i säsongen</p>`;
-  lb.forEach(({name,pts,played,wins,scored},i) => {
+  let h=`<p style="font-size:13px;color:var(--g500);margin-bottom:1rem;">${matchCount} ${matchCount===1?'match avgjord':'matcher avgjorda'} hittills</p>`;
+  lb.forEach(({name,pts,played,wins,scored},i)=>{
     const pct=played?Math.round(wins/played*100):0;
     const hPct=played?Math.round(scored/played*100):0;
     h+=`<div class="row">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:18px;width:28px">${medal[i]||''}</span>
-        <div>
-          <p style="font-size:16px;font-weight:${i===0?800:600}">${esc(name)}</p>
-          <p style="font-size:12px;color:var(--g400)">${played} matcher · ${wins} perfekta (${pct}%) · poängsatt ${hPct}%</p>
-        </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;width:28px;">${medal[i]||''}</span>
+        <div><p style="font-size:16px;font-weight:${i===0?800:600};">${esc(name)}</p><p style="font-size:12px;color:var(--g400);">${played} matcher · ${wins} perfekta (${pct}%) · poängsatt ${hPct}%</p></div>
       </div>
-      <p style="font-size:26px;font-weight:900;color:${i===0?'#15803d':'var(--g900)'}">${pts}p</p>
+      <p style="font-size:26px;font-weight:900;color:${i===0?'#15803d':'var(--g900)'};">${pts}p</p>
     </div>`;
   });
   el.innerHTML=h;
-  info.innerHTML=`<div class="card" style="background:var(--g50)">
-    <p class="lbl" style="margin-bottom:6px">Poängsystem</p>
-    <p style="font-size:13px;color:var(--g600)">Rätt halvtid = 1p &nbsp;·&nbsp; Rätt slutresultat = 2p &nbsp;·&nbsp; Båda rätt = 4p (bonus)</p>
+  info.innerHTML=`<div class="card" style="background:var(--g50);">
+    <p class="lbl" style="margin-bottom:6px;">Poängsystem</p>
+    <p style="font-size:13px;color:var(--g600);">Rätt halvtid = 1p &nbsp;·&nbsp; Rätt slutresultat = 2p &nbsp;·&nbsp; Båda rätt = 4p</p>
   </div>`;
-}
-
-// ── AI: Matchinfo ──────────────────────────────────────────────
-async function fetchInfo() {
-  const m = matches.find(x=>x.id===mid); if(!m) return;
-  const btn=document.getElementById('fetch-btn');
-  btn.textContent='Hämtar…'; btn.disabled=true;
-  document.getElementById('info-display').innerHTML=
-    `<p style="color:var(--g500);font-size:14px;padding:8px 0">Söker form, odds och analys…</p>`;
-  const dateStr=new Date(m.date).toLocaleDateString('sv-SE',{day:'numeric',month:'long',year:'numeric'});
-  try {
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",max_tokens:1000,
-        tools:[{type:"web_search_20250305",name:"web_search"}],
-        messages:[{role:"user",content:`Du hjälper ett gäng kollegor på Åland tippa halvtids- och slutresultat på fotbollsmatcher. Sök och ge en kortfattad matchanalys på svenska för:
-
-Match: ${m.homeTeam} mot ${m.opp}
-Datum: ${dateStr}${m.competition?'\nTävling: '+m.competition:''}
-
-Ge en strukturerad analys:
-⚽ Form – ${m.homeTeam} (senaste 3–5 matcher)
-⚽ Form – ${m.opp} (senaste 3–5 matcher)
-📊 Odds 1X2 (t.ex. Unibet, Veikkaus)
-🔄 Inbördes möten (om hittbart)
-🚨 Skador & avstängningar (om känt)
-🎯 Prognos: troligaste halvtids- och slutresultat med kort motivering
-
-Var kortfattad och konkret.`}]
-      })
-    });
-    const data=await r.json();
-    const text=data.content.filter(x=>x.type==='text').map(x=>x.text).join('\n').trim();
-    if (text) {
-      await db.collection('matches').doc(mid).update({info:text});
-      document.getElementById('info-display').innerHTML=
-        `<div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--g800)">${esc(text)}</div>`;
-    } else {
-      document.getElementById('info-display').innerHTML=`<p style="color:var(--g500);font-size:14px">Kunde inte hämta info. Försök igen.</p>`;
-    }
-  } catch(e) {
-    document.getElementById('info-display').innerHTML=`<p style="color:#dc2626;font-size:14px">Fel: ${esc(e.message)}</p>`;
-  }
-  btn.textContent='Uppdatera matchinfo med AI ✦'; btn.disabled=false;
-}
-
-// ── AI: Hämta resultat ─────────────────────────────────────────
-async function fetchResult() {
-  const m=matches.find(x=>x.id===mid); if(!m) return;
-  const btn=document.getElementById('fetch-result-btn');
-  btn.textContent='Söker…'; btn.disabled=true;
-  const dateStr=new Date(m.date).toLocaleDateString('sv-SE',{day:'numeric',month:'long',year:'numeric'});
-  try {
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",max_tokens:400,
-        tools:[{type:"web_search_20250305",name:"web_search"}],
-        messages:[{role:"user",content:`Sök upp det faktiska slutresultatet för denna fotbollsmatch och svara BARA med JSON utan förklaring:
-{"ht":"1-0","ft":"2-1"}
-
-Match: ${m.homeTeam} mot ${m.opp}
-Datum: ${dateStr}${m.competition?'\nTävling: '+m.competition:''}
-
-Om resultatet saknas: {"error":"not found"}`}]
-      })
-    });
-    const data=await r.json();
-    const text=data.content.filter(x=>x.type==='text').map(x=>x.text).join('').trim();
-    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-    if (parsed.error) {
-      toast('Kunde inte hitta resultatet – ange manuellt.','error');
-    } else if (parsed.ht && parsed.ft) {
-      ['r-ht-h','r-ht-a'].forEach((id,i)=>document.getElementById(id).value=parsed.ht.split('-')[i]||'');
-      ['r-ft-h','r-ft-a'].forEach((id,i)=>document.getElementById(id).value=parsed.ft.split('-')[i]||'');
-      if (confirm(`AI hittade: HT ${parsed.ht} · FT ${parsed.ft}\n\nSpara detta resultat?`)) {
-        await saveResult(parsed.ht, parsed.ft);
-      }
-    }
-  } catch(e) { toast('Resultat ej hittat – ange manuellt.','error'); }
-  btn.textContent='Hämta resultat med AI ✦'; btn.disabled=false;
-}
-
-// ── AI: Säsongsschema ──────────────────────────────────────────
-async function fetchSeason() {
-  if (!db) { toast('Firebase ej konfigurerat.','error'); return; }
-  const btn=document.getElementById('season-btn');
-  btn.textContent='Hämtar schema…'; btn.disabled=true;
-  try {
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",max_tokens:2000,
-        tools:[{type:"web_search_20250305",name:"web_search"}],
-        messages:[{role:"user",content:`Sök upp och lista alla hemmamatcher för IFK Mariehamn och Åland United år 2026. Svara BARA med giltig JSON (inga kommentarer):
-[
-  {"homeTeam":"IFK Mariehamn","opp":"HJK","competition":"Veikkausliiga","date":"2026-04-15T18:00"},
-  {"homeTeam":"Åland United","opp":"TPS","competition":"Naisten Liiga","date":"2026-04-20T16:00"}
-]
-Datum i ISO 8601. Om tid saknas: herrar=18:00, damer=16:00.`}]
-      })
-    });
-    const data=await r.json();
-    const text=data.content.filter(x=>x.type==='text').map(x=>x.text).join('').trim();
-    const found=JSON.parse(text.replace(/```json|```/g,'').trim());
-    if (!Array.isArray(found)||!found.length) throw new Error('Inga matcher i svaret');
-    // Befintliga matcher för dubblettcheck
-    const existing=matches.map(m=>m.homeTeam+'|'+m.opp+'|'+m.date.slice(0,10));
-    let added=0, skipped=0;
-    const batch=db.batch();
-    found.forEach(m=>{
-      if (!m.homeTeam||!m.opp||!m.date) return;
-      const key=m.homeTeam+'|'+m.opp+'|'+m.date.slice(0,10);
-      if (existing.includes(key)) { skipped++; return; }
-      const ref=db.collection('matches').doc();
-      batch.set(ref,{
-        homeTeam:m.homeTeam, opp:m.opp, competition:m.competition||'',
-        date:m.date, tips:[], result:null, info:null,
-        createdAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
-      added++;
-    });
-    await batch.commit();
-    toast(`${added} matcher inlagda${skipped?' ('+skipped+' dubbletter hoppades)':''}! ✓`,'success');
-  } catch(e) { toast('Kunde inte hämta schema: '+e.message,'error'); }
-  btn.textContent='Hämta schema med AI ✦'; btn.disabled=false;
-}
-
-// ── Start ──────────────────────────────────────────────────────
-const ok = initFirebase();
-if (ok) {
-  startListener();
-  // Kort fördröjning så att lyssnarens första snapshot hinner ladda
-  setTimeout(() => {
-    document.getElementById('loading-msg').style.display='none';
-    showView('home');
-  }, 1500);
 }
 </script>
 </body>
